@@ -3,6 +3,12 @@
 -- Da a los usuarios autenticados (los que entran con email + contraseña)
 -- permiso para crear/editar/borrar productos y subir imágenes.
 
+-- 0) Bucket de imágenes -------------------------------------------------------
+-- Crea el bucket "productos" como público (idempotente).
+insert into storage.buckets (id, name, public)
+values ('productos', 'productos', true)
+on conflict (id) do update set public = true;
+
 -- 1) Escritura de productos para usuarios autenticados -----------------------
 drop policy if exists "Admin inserta productos" on productos;
 create policy "Admin inserta productos"
