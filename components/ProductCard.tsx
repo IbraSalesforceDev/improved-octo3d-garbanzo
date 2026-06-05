@@ -17,11 +17,32 @@ export default function ProductCard({ producto }: { producto: Producto }) {
     return init;
   });
 
+  const [copiado, setCopiado] = useState(false);
+
   const precioFinal = calcularPrecio(
     producto.precio_base,
     producto.opciones,
     seleccion
   );
+
+  // Mensaje de pedido listo para copiar y pegar (p. ej. en WhatsApp).
+  const lineasOpciones = grupos
+    .map(([grupo]) => `${grupo}: ${seleccion[grupo]}`)
+    .join(", ");
+  const mensajePedido =
+    `¡Hola! Quiero pedir:\n\n*${producto.nombre}*` +
+    (lineasOpciones ? `\n${lineasOpciones}` : "") +
+    `\nPrecio: ${formatEUR(precioFinal)}`;
+
+  async function copiarPedido() {
+    try {
+      await navigator.clipboard.writeText(mensajePedido);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      // Algunos navegadores bloquean el portapapeles; lo ignoramos.
+    }
+  }
 
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
@@ -93,6 +114,19 @@ export default function ProductCard({ producto }: { producto: Producto }) {
           <span className="text-sm text-neutral-500">Precio</span>
           <span className="text-2xl font-bold">{formatEUR(precioFinal)}</span>
         </div>
+
+        <button
+          type="button"
+          onClick={copiarPedido}
+          className={
+            "flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition " +
+            (copiado
+              ? "bg-green-600"
+              : "bg-neutral-900 hover:bg-neutral-800")
+          }
+        >
+          {copiado ? "¡Pedido copiado!" : "Copiar pedido"}
+        </button>
       </div>
     </article>
   );
