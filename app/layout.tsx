@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"], display: "swap" });
+
 export const metadata: Metadata = {
-  title: "Catálogo de Figuras 3D",
-  description: "Figuras de impresión 3D personalizables",
+  title: "Figuras 3D — Catálogo",
+  description: "Figuras de impresión 3D personalizables, hechas a mano.",
 };
 
 export default function RootLayout({
@@ -13,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
+      <body
+        className={`${inter.className} min-h-screen bg-neutral-50 text-neutral-900 antialiased`}
+      >
         {children}
       </body>
     </html>
