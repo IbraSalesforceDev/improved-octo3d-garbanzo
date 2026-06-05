@@ -41,9 +41,9 @@ Abre http://localhost:3000
 2. En **SQL Editor**, ejecuta el contenido de [`supabase/schema.sql`](supabase/schema.sql).
    Eso crea la tabla `productos`, abre la lectura pública (RLS) y carga ejemplos.
 3. En **Storage**, crea un bucket público llamado `productos` para las imágenes.
-4. En **Project Settings → API**, copia:
+4. En **Project Settings → API** (o el botón **Connect**), copia:
    - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public key` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `publishable key` (`sb_publishable_...`) → `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 5. Pégalas en `.env.local` (local) y en las variables de entorno de Vercel.
 
 ### Añadir productos
@@ -56,7 +56,7 @@ Para `imagen_url`, sube la imagen al bucket `productos` y pega su URL pública.
 1. Sube el repo a GitHub.
 2. En [Vercel](https://vercel.com), importa el repositorio.
 3. Añade las variables de entorno `NEXT_PUBLIC_SUPABASE_URL` y
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 4. Deploy. Cada `git push` vuelve a desplegar automáticamente.
 
 ## Estructura
@@ -67,8 +67,11 @@ app/                 Páginas (App Router)
   layout.tsx
 components/
   ProductCard.tsx    Tarjeta con selector de opciones y precio dinámico
+utils/supabase/
+  server.ts          Cliente de Supabase para Server Components
+  client.ts          Cliente para componentes de navegador
+  middleware.ts      Helper de sesión (para el futuro panel de admin)
 lib/
-  supabase.ts        Cliente de Supabase
   productos.ts       Lectura de productos (con fallback a demo)
   precio.ts          Cálculo del precio final
   sampleData.ts      Productos de demostración

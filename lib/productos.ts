@@ -1,18 +1,28 @@
-import { getSupabaseClient } from "./supabase";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 import { sampleProductos } from "./sampleData";
 import type { Producto } from "./types";
 
+// La app arranca con datos de demo si todavía no hay claves de Supabase.
+const isSupabaseConfigured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+);
+
 export interface ProductosResult {
   productos: Producto[];
-  // true cuando se están mostrando datos de demo (Supabase sin configurar o sin datos).
+  // true cuando se muestran datos de demo (Supabase sin configurar o sin datos).
   demo: boolean;
 }
 
 export async function getProductos(): Promise<ProductosResult> {
-  const supabase = getSupabaseClient();
-  if (!supabase) {
+  if (!isSupabaseConfigured) {
     return { productos: sampleProductos, demo: true };
   }
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
 
   const { data, error } = await supabase
     .from("productos")
