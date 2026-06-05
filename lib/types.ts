@@ -15,3 +15,14 @@ export interface Producto {
   activo: boolean;
   created_at: string;
 }
+
+// Datos que envía el formulario de admin al crear/editar un producto.
+export interface ProductoInput {
+  id?: string;
+  nombre: string;
+  descripcion: string | null;
+  precio_base: number;
+  imagen_url: string | null;
+  opciones: Opciones;
+  activo: boolean;
+}
