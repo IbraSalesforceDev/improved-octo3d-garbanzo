@@ -8,9 +8,9 @@ export const site = {
     "Figuras y objetos de impresión 3D personalizables. Elige color, tamaño y acabado, y mira el precio al instante.",
 
   hero: {
-    titulo: "Figuras 3D hechas a mano, a tu gusto",
+    titulo: "Figuras 3D diseñadas a tu gusto",
     subtitulo:
-      "Personaliza color, tamaño y acabado y mira el precio al instante. Cuando lo tengas, copia tu pedido y envíamelo.",
+      "Personaliza color, tamaño y acabado, y comprueba el precio al instante. Cuando lo tengas, copia tu pedido y envíamelo.",
   },
 
   // Sección "Cómo funciona" (3 pasos)

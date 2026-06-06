@@ -26,6 +26,12 @@ function CubeIcon({ className = "" }: { className?: string }) {
 
 export default async function Home() {
   const { productos, demo } = await getProductos();
+  const destacada = productos.find(
+    (p) => (p.imagenes && p.imagenes[0]) || p.imagen_url
+  );
+  const heroImg = destacada
+    ? destacada.imagenes?.[0] ?? destacada.imagen_url
+    : null;
 
   return (
     <>
@@ -34,8 +40,7 @@ export default async function Home() {
       <main id="top">
         {/* ===== HERO ===== */}
         <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-violet-300/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 -left-24 h-72 w-72 rounded-full bg-violet-200/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-violet-200/30 blur-3xl" />
 
           <div className="relative mx-auto grid max-w-[1080px] items-center gap-10 px-5 py-16 sm:px-8 md:grid-cols-2 md:py-24">
             <div>
@@ -64,15 +69,28 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Mockup decorativo */}
-            <div className="relative mx-auto aspect-square w-full max-w-sm">
-              <div className="absolute inset-0 rotate-3 rounded-[2rem] bg-gradient-to-br from-[var(--morado)] to-violet-400" />
-              <div className="absolute inset-0 flex -rotate-3 items-center justify-center rounded-[2rem] bg-white shadow-xl">
-                <CubeIcon className="h-28 w-28 text-[var(--morado)]" />
+            {/* Imagen destacada o panel de marca */}
+            {heroImg ? (
+              <div className="relative mx-auto w-full max-w-sm">
+                <div className="overflow-hidden rounded-[2rem] border border-neutral-200/70 bg-white shadow-xl">
+                  <div className="aspect-square w-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={heroImg}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <span className="absolute -right-3 -top-3 h-12 w-12 rounded-full bg-[var(--lima)]" />
               </div>
-              <span className="absolute -right-3 -top-3 h-14 w-14 rounded-full bg-[var(--lima)]" />
-              <span className="absolute -bottom-2 left-6 h-6 w-6 rounded-full bg-[var(--morado)]" />
-            </div>
+            ) : (
+              <div className="relative mx-auto flex aspect-square w-full max-w-sm flex-col items-center justify-center gap-4 rounded-[2rem] bg-gradient-to-br from-[var(--morado)] to-violet-500 text-white shadow-xl">
+                <CubeIcon className="h-24 w-24" />
+                <span className="text-2xl font-bold">{site.name}</span>
+                <span className="absolute -right-3 -top-3 h-12 w-12 rounded-full bg-[var(--lima)]" />
+              </div>
+            )}
           </div>
         </section>
 

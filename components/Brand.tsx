@@ -1,5 +1,16 @@
 import { site } from "@/lib/site";
 
+// Muestra el nombre con el sufijo "3D" en verde (lima legible).
+function NombreMarca() {
+  const m = site.name.match(/^(.*?)\s*(3D)\s*$/i);
+  if (!m) return <>{site.name}</>;
+  return (
+    <>
+      {m[1]} <span className="text-lime-600">{m[2]}</span>
+    </>
+  );
+}
+
 // Logo de la tienda: un icono de cubo en color de marca + el nombre.
 // Si tienes un logo en imagen, puedes sustituir el <span> del icono por
 // <img src="/logo.png" ... />.
@@ -29,7 +40,9 @@ export default function Brand({
           />
         </svg>
       </span>
-      <span className="font-bold tracking-tight">{site.name}</span>
+      <span className="font-bold tracking-tight">
+        <NombreMarca />
+      </span>
     </span>
   );
 }
