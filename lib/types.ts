@@ -11,8 +11,11 @@ export interface Producto {
   descripcion: string | null;
   precio_base: number;
   imagen_url: string | null;
+  imagenes: string[];
   opciones: Opciones;
   categoria: string | null;
+  orden: number;
+  destacado: boolean;
   activo: boolean;
   created_at: string;
 }
@@ -23,8 +26,9 @@ export interface ProductoInput {
   nombre: string;
   descripcion: string | null;
   precio_base: number;
-  imagen_url: string | null;
+  imagenes: string[];
   opciones: Opciones;
   categoria: string | null;
+  destacado: boolean;
   activo: boolean;
 }

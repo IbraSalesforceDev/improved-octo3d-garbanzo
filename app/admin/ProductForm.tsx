@@ -58,16 +58,58 @@ export default function ProductForm({
     producto ? String(producto.precio_base) : ""
   );
   const [activo, setActivo] = useState(producto?.activo ?? true);
-  const [imagenUrl, setImagenUrl] = useState<string | null>(
-    producto?.imagen_url ?? null
-  );
-  const [file, setFile] = useState<File | null>(null);
+  const [destacado, setDestacado] = useState(producto?.destacado ?? false);
+  const [imagenes, setImagenes] = useState<string[]>(() => {
+    if (producto?.imagenes?.length) return producto.imagenes;
+    if (producto?.imagen_url) return [producto.imagen_url];
+    return [];
+  });
+  const [subiendo, setSubiendo] = useState(false);
   const [grupos, setGrupos] = useState<Grupo[]>(
     producto ? opcionesToGrupos(producto.opciones) : []
   );
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // --- Imágenes -------------------------------------------------------------
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setSubiendo(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const nuevas: string[] = [];
+      for (const file of files) {
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("productos")
+          .upload(path, file, { cacheControl: "3600", upsert: false });
+        if (upErr) throw new Error(`Subiendo imagen: ${upErr.message}`);
+        nuevas.push(
+          supabase.storage.from("productos").getPublicUrl(path).data.publicUrl
+        );
+      }
+      setImagenes((prev) => [...prev, ...nuevas]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al subir imágenes.");
+    } finally {
+      setSubiendo(false);
+      e.target.value = "";
+    }
+  }
+
+  const quitarImagen = (url: string) =>
+    setImagenes((prev) => prev.filter((u) => u !== url));
+  const hacerPortada = (i: number) =>
+    setImagenes((prev) => {
+      const copia = [...prev];
+      const [img] = copia.splice(i, 1);
+      copia.unshift(img);
+      return copia;
+    });
 
   // --- Editor de opciones ---------------------------------------------------
   const addGrupo = () =>
@@ -126,28 +168,15 @@ export default function ProductForm({
 
     setSaving(true);
     try {
-      let finalImagenUrl = imagenUrl;
-
-      if (file) {
-        const supabase = createClient();
-        const ext = file.name.split(".").pop() ?? "jpg";
-        const path = `${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("productos")
-          .upload(path, file, { cacheControl: "3600", upsert: false });
-        if (upErr) throw new Error(`Subiendo imagen: ${upErr.message}`);
-        finalImagenUrl = supabase.storage.from("productos").getPublicUrl(path)
-          .data.publicUrl;
-      }
-
       await saveProducto({
         id: producto?.id,
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || null,
         precio_base: precio,
-        imagen_url: finalImagenUrl,
+        imagenes,
         opciones: gruposToOpciones(grupos),
         categoria: categoria.trim() || null,
+        destacado,
         activo,
       });
 
@@ -236,40 +265,72 @@ export default function ProductForm({
           />
           Visible en el catálogo
         </label>
+        <label className="flex items-center gap-2 pb-2 text-sm">
+          <input
+            type="checkbox"
+            checked={destacado}
+            onChange={(e) => setDestacado(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Destacado
+        </label>
       </div>
 
-      {/* Imagen */}
+      {/* Imágenes (galería) */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Imagen</label>
-        <div className="flex items-center gap-4">
-          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
-            {(file || imagenUrl) && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={file ? URL.createObjectURL(file) : (imagenUrl as string)}
-                alt="Vista previa"
-                className="h-full w-full object-cover"
-              />
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="text-sm"
-            />
-            {imagenUrl && !file && (
-              <button
-                type="button"
-                onClick={() => setImagenUrl(null)}
-                className="self-start text-xs text-red-600 hover:underline"
+        <label className="mb-1 block text-sm font-medium">
+          Imágenes{" "}
+          <span className="font-normal text-neutral-400">
+            (la primera es la portada)
+          </span>
+        </label>
+
+        {imagenes.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-3">
+            {imagenes.map((url, i) => (
+              <div
+                key={url}
+                className="relative h-24 w-24 overflow-hidden rounded-lg border border-neutral-200"
               >
-                Quitar imagen actual
-              </button>
-            )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => quitarImagen(url)}
+                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-xs text-white hover:bg-black/80"
+                  aria-label="Quitar"
+                >
+                  ✕
+                </button>
+                {i === 0 ? (
+                  <span className="absolute bottom-1 left-1 rounded bg-[var(--morado)] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                    Portada
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => hacerPortada(i)}
+                    className="absolute bottom-1 left-1 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-neutral-700 hover:bg-white"
+                  >
+                    Hacer portada
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
-        </div>
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={onFiles}
+          disabled={subiendo}
+          className="text-sm"
+        />
+        {subiendo && (
+          <p className="mt-1 text-xs text-neutral-500">Subiendo imágenes...</p>
+        )}
       </div>
 
       {/* Editor de opciones */}
@@ -281,7 +342,7 @@ export default function ProductForm({
           <button
             type="button"
             onClick={addGrupo}
-            className="text-sm text-blue-600 hover:underline"
+            className="text-sm text-[var(--morado)] hover:underline"
           >
             + Añadir grupo
           </button>
@@ -351,7 +412,7 @@ export default function ProductForm({
                 <button
                   type="button"
                   onClick={() => addChoice(g.key)}
-                  className="self-start text-sm text-blue-600 hover:underline"
+                  className="self-start text-sm text-[var(--morado)] hover:underline"
                 >
                   + Añadir elección
                 </button>
@@ -370,8 +431,8 @@ export default function ProductForm({
       <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
         <button
           type="submit"
-          disabled={saving}
-          className="rounded-xl bg-[var(--brand)] px-5 py-2.5 font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:opacity-50"
+          disabled={saving || subiendo}
+          className="rounded-xl bg-[var(--morado)] px-5 py-2.5 font-semibold text-white transition hover:bg-[var(--morado-claro)] disabled:opacity-50"
         >
           {saving ? "Guardando..." : editando ? "Guardar cambios" : "Crear producto"}
         </button>

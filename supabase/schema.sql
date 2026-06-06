@@ -8,8 +8,11 @@ create table if not exists productos (
   descripcion text,
   precio_base numeric(10, 2) not null,
   imagen_url text,
+  imagenes text[] not null default '{}',
   opciones jsonb not null default '{}'::jsonb,
   categoria text,
+  orden integer not null default 0,
+  destacado boolean not null default false,
   activo boolean not null default true,
   created_at timestamptz not null default now()
 );

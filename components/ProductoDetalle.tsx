@@ -1,39 +1,21 @@
 import type { Producto } from "@/lib/types";
 import PedidoBox from "./PedidoBox";
 import ShareButton from "./ShareButton";
+import Galeria from "./Galeria";
 
 export default function ProductoDetalle({ producto }: { producto: Producto }) {
+  // Usa la galería si existe; si no, recurre a la imagen de portada.
+  const imagenes =
+    producto.imagenes && producto.imagenes.length > 0
+      ? producto.imagenes
+      : producto.imagen_url
+        ? [producto.imagen_url]
+        : [];
+
   return (
     <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-12">
-      {/* Imagen */}
-      <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-gradient-to-br from-neutral-100 to-neutral-200">
-        <div className="aspect-square w-full">
-          {producto.imagen_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={producto.imagen_url}
-              alt={producto.nombre}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-neutral-300">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-16 w-16"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
-                />
-              </svg>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Galería */}
+      <Galeria imagenes={imagenes} nombre={producto.nombre} />
 
       {/* Información */}
       <div className="flex flex-col gap-5">

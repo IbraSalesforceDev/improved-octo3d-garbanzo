@@ -28,6 +28,8 @@ export async function getProductos(): Promise<ProductosResult> {
     .from("productos")
     .select("*")
     .eq("activo", true)
+    .order("destacado", { ascending: false })
+    .order("orden", { ascending: true })
     .order("created_at", { ascending: false });
 
   if (error) {
