@@ -3,16 +3,35 @@
 @tailwind utilities;
 
 :root {
-  /* Color de marca. Cámbialo aquí y se aplica en toda la app. */
-  --brand: #4f46e5; /* índigo */
-  --brand-dark: #4338ca; /* tono oscuro para hover */
+  /* Paleta de marca. Cambia aquí y se aplica en toda la app. */
+  --morado: #6d28d9;
+  --morado-claro: #7c3aed; /* hover (más claro) */
+  --lima: #b6f23a; /* solo para detalles pequeños */
+  --tinta: #211c35; /* texto principal / títulos */
+  --gris: #6b6b7a; /* texto secundario */
+  --fondo: #fbfaff; /* fondo general */
+
+  /* Alias para componentes que usan --brand */
+  --brand: var(--morado);
+  --brand-dark: var(--morado-claro);
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+body {
+  color: var(--tinta);
+  background-color: var(--fondo);
+}
+
 ::selection {
-  background-color: var(--brand);
+  background-color: var(--morado);
   color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--morado);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
