@@ -105,8 +105,8 @@ export default function ProductCard({ producto }: { producto: Producto }) {
                         className={
                           "rounded-full border px-3 py-1.5 text-sm transition " +
                           (activa
-                            ? "border-indigo-600 bg-indigo-600 text-white shadow-sm"
-                            : "border-neutral-200 bg-white text-neutral-700 hover:border-indigo-300 hover:bg-indigo-50")
+                            ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-sm"
+                            : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50")
                         }
                       >
                         {opcion}
@@ -140,7 +140,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
             "flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] " +
             (copiado
               ? "bg-emerald-600"
-              : "bg-indigo-600 hover:bg-indigo-700")
+              : "bg-[var(--brand)] hover:bg-[var(--brand-dark)]")
           }
         >
           {copiado ? (

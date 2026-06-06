@@ -2,11 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Color de marca. Cámbialo aquí y se aplica en toda la app. */
+  --brand: #4f46e5; /* índigo */
+  --brand-dark: #4338ca; /* tono oscuro para hover */
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 ::selection {
-  background-color: #6366f1; /* indigo-500 */
+  background-color: var(--brand);
   color: white;
 }

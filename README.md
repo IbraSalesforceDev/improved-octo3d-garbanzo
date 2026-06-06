@@ -46,6 +46,17 @@ Abre http://localhost:3000
    - `publishable key` (`sb_publishable_...`) → `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 5. Pégalas en `.env.local` (local) y en las variables de entorno de Vercel.
 
+## Personalizar la marca
+
+- **Nombre, eslogan y descripción**: edita [`lib/site.ts`](lib/site.ts).
+- **Color de marca**: cambia `--brand` y `--brand-dark` en [`app/globals.css`](app/globals.css).
+  Si cambias el color, actualízalo también en `app/icon.svg` (favicon) y
+  `app/opengraph-image.tsx` (imagen al compartir).
+- **Logo**: por defecto es un icono + el nombre ([`components/Brand.tsx`](components/Brand.tsx)).
+  Puedes sustituir el icono por tu imagen en `public/`.
+- **Imagen al compartir**: se genera sola desde `app/opengraph-image.tsx`.
+  Define `NEXT_PUBLIC_SITE_URL` en Vercel para que use URLs absolutas.
+
 ### Añadir productos
 
 Desde el panel de Supabase (**Table Editor → productos**) puedes añadir filas.

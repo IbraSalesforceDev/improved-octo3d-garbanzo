@@ -1,5 +1,6 @@
 import ProductCard from "@/components/ProductCard";
 import { getProductos } from "@/lib/productos";
+import { site } from "@/lib/site";
 
 // Releer en cada visita para que los cambios en Supabase salgan al momento.
 export const dynamic = "force-dynamic";
@@ -21,15 +22,31 @@ export default async function Home() {
           }}
         />
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white/70 px-3 py-1 text-xs font-medium text-indigo-700 backdrop-blur">
-            ✦ Impresión 3D artesanal
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white/70 px-3 py-1 text-xs font-medium text-[var(--brand)] backdrop-blur">
+            ✦ {site.tagline}
           </span>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
-            Figuras 3D
-          </h1>
-          <p className="mt-3 max-w-xl text-base text-neutral-600 sm:text-lg">
-            Elige color, tamaño y acabado, y mira el precio actualizarse al
-            instante. Cuando lo tengas, copia tu pedido y escríbeme.
+          <div className="mt-5 flex items-center gap-4">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[var(--brand)] text-white shadow-lg sm:h-16 sm:w-16">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.6}
+                className="h-8 w-8 sm:h-9 sm:w-9"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
+                />
+              </svg>
+            </span>
+            <h1 className="text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
+              {site.name}
+            </h1>
+          </div>
+          <p className="mt-4 max-w-xl text-base text-neutral-600 sm:text-lg">
+            {site.description}
           </p>
         </div>
       </header>
@@ -58,7 +75,7 @@ export default async function Home() {
       {/* Footer */}
       <footer className="border-t border-neutral-200/70 py-8">
         <p className="text-center text-sm text-neutral-400">
-          Hecho con cariño · Impresión 3D
+          {site.name} · Hecho con cariño
         </p>
       </footer>
     </div>
