@@ -12,6 +12,7 @@ export interface Producto {
   precio_base: number;
   imagen_url: string | null;
   opciones: Opciones;
+  categoria: string | null;
   activo: boolean;
   created_at: string;
 }
@@ -24,5 +25,6 @@ export interface ProductoInput {
   precio_base: number;
   imagen_url: string | null;
   opciones: Opciones;
+  categoria: string | null;
   activo: boolean;
 }

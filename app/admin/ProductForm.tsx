@@ -41,12 +41,19 @@ function gruposToOpciones(grupos: Grupo[]): Opciones {
   return out;
 }
 
-export default function ProductForm({ producto }: { producto?: Producto }) {
+export default function ProductForm({
+  producto,
+  categorias = [],
+}: {
+  producto?: Producto;
+  categorias?: string[];
+}) {
   const router = useRouter();
   const editando = Boolean(producto);
 
   const [nombre, setNombre] = useState(producto?.nombre ?? "");
   const [descripcion, setDescripcion] = useState(producto?.descripcion ?? "");
+  const [categoria, setCategoria] = useState(producto?.categoria ?? "");
   const [precioBase, setPrecioBase] = useState(
     producto ? String(producto.precio_base) : ""
   );
@@ -140,6 +147,7 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
         precio_base: precio,
         imagen_url: finalImagenUrl,
         opciones: gruposToOpciones(grupos),
+        categoria: categoria.trim() || null,
         activo,
       });
 
@@ -187,6 +195,22 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
           rows={3}
           className={inputCls}
         />
+      </div>
+
+      <div className="w-full sm:w-72">
+        <label className="mb-1 block text-sm font-medium">Categoría</label>
+        <input
+          list="categorias-list"
+          value={categoria}
+          onChange={(e) => setCategoria(e.target.value)}
+          placeholder="Ej. Llaveros, Figuras, Hogar"
+          className={inputCls}
+        />
+        <datalist id="categorias-list">
+          {categorias.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
       </div>
 
       <div className="flex flex-wrap items-end gap-6">

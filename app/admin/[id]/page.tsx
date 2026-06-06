@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { getCategorias } from "@/lib/productos";
 import type { Producto } from "@/lib/types";
 import AdminHeader from "../AdminHeader";
 import ProductForm from "../ProductForm";
@@ -21,11 +22,13 @@ export default async function EditarProductoPage({
 
   if (!data) notFound();
 
+  const categorias = await getCategorias();
+
   return (
     <>
       <AdminHeader />
       <h1 className="mb-6 text-2xl font-bold">Editar producto</h1>
-      <ProductForm producto={data as Producto} />
+      <ProductForm producto={data as Producto} categorias={categorias} />
     </>
   );
 }

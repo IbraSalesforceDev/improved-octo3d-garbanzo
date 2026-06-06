@@ -41,3 +41,18 @@ export async function getProductos(): Promise<ProductosResult> {
 
   return { productos: data as Producto[], demo: false };
 }
+
+// Lista de categorías existentes (para sugerencias en el panel de admin).
+export async function getCategorias(): Promise<string[]> {
+  if (!isSupabaseConfigured) return [];
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data } = await supabase.from("productos").select("categoria");
+  if (!data) return [];
+  const set = new Set(
+    data
+      .map((r) => (r as { categoria: string | null }).categoria)
+      .filter((c): c is string => Boolean(c))
+  );
+  return Array.from(set).sort();
+}

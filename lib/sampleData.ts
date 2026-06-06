@@ -15,6 +15,7 @@ export const sampleProductos: Producto[] = [
       color: { blanco: 0, negro: 3, dorado: 5 },
       tamano: { S: 0, M: 5, L: 10 },
     },
+    categoria: "Figuras",
     activo: true,
     created_at: new Date().toISOString(),
   },
@@ -27,6 +28,7 @@ export const sampleProductos: Producto[] = [
     opciones: {
       color: { blanco: 0, terracota: 2, verde: 2 },
     },
+    categoria: "Hogar",
     activo: true,
     created_at: new Date().toISOString(),
   },
@@ -40,6 +42,7 @@ export const sampleProductos: Producto[] = [
       color: { negro: 0, azul: 1, rojo: 1 },
       acabado: { mate: 0, brillo: 2 },
     },
+    categoria: "Accesorios",
     activo: true,
     created_at: new Date().toISOString(),
   },

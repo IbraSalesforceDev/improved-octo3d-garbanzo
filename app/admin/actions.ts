@@ -23,6 +23,7 @@ export async function saveProducto(input: ProductoInput) {
     precio_base: input.precio_base,
     imagen_url: input.imagen_url,
     opciones: input.opciones,
+    categoria: input.categoria,
     activo: input.activo,
   };
 

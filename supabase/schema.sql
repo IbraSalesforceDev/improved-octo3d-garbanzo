@@ -9,6 +9,7 @@ create table if not exists productos (
   precio_base numeric(10, 2) not null,
   imagen_url text,
   opciones jsonb not null default '{}'::jsonb,
+  categoria text,
   activo boolean not null default true,
   created_at timestamptz not null default now()
 );
