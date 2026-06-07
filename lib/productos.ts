@@ -24,7 +24,8 @@ export async function getProductos(): Promise<ProductosResult> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { data, error } = await supabase
+  // Intento completo: destacados primero y orden manual.
+  let res = await supabase
     .from("productos")
     .select("*")
     .eq("activo", true)
@@ -32,16 +33,27 @@ export async function getProductos(): Promise<ProductosResult> {
     .order("orden", { ascending: true })
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error leyendo productos de Supabase:", error.message);
+  // Si fallan columnas nuevas (migración pendiente), reintenta sin ellas
+  // para no perder los productos reales.
+  if (res.error) {
+    console.error("getProductos:", res.error.message);
+    res = await supabase
+      .from("productos")
+      .select("*")
+      .eq("activo", true)
+      .order("created_at", { ascending: false });
+  }
+
+  if (res.error) {
+    console.error("getProductos (fallback):", res.error.message);
     return { productos: sampleProductos, demo: true };
   }
 
-  if (!data || data.length === 0) {
+  if (!res.data || res.data.length === 0) {
     return { productos: sampleProductos, demo: true };
   }
 
-  return { productos: data as Producto[], demo: false };
+  return { productos: res.data as Producto[], demo: false };
 }
 
 // Lista de categorías existentes (para sugerencias en el panel de admin).

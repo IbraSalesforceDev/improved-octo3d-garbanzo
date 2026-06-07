@@ -9,12 +9,23 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const supabase = createClient(await cookies());
-  const { data, error } = await supabase
+
+  // Intento con orden manual; si la columna no existe (migración pendiente),
+  // reintenta por fecha para no romper el panel.
+  let res = await supabase
     .from("productos")
     .select("*")
     .order("orden", { ascending: true })
     .order("created_at", { ascending: false });
 
+  if (res.error) {
+    res = await supabase
+      .from("productos")
+      .select("*")
+      .order("created_at", { ascending: false });
+  }
+
+  const { data, error } = res;
   const productos = (data ?? []) as Producto[];
 
   return (
