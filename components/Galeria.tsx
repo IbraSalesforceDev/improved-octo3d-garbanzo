@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export default function Galeria({
   imagenes,
@@ -38,12 +39,14 @@ export default function Galeria({
   return (
     <div className="flex flex-col gap-3">
       <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-100">
-        <div className="aspect-square w-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <div className="relative aspect-square w-full">
+          <Image
             src={principal}
             alt={nombre}
-            className="h-full w-full object-cover"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
           />
         </div>
       </div>
@@ -62,10 +65,11 @@ export default function Galeria({
                   : "border-transparent opacity-70 hover:opacity-100")
               }
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={url}
                 alt={`${nombre} ${i + 1}`}
+                width={64}
+                height={64}
                 className="h-full w-full object-cover"
               />
             </button>

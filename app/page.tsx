@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SiteHeader from "@/components/SiteHeader";
 import CatalogoFiltrable from "@/components/CatalogoFiltrable";
 import { getProductos } from "@/lib/productos";
@@ -73,12 +74,14 @@ export default async function Home() {
             {heroImg ? (
               <div className="relative mx-auto w-full max-w-sm">
                 <div className="overflow-hidden rounded-[2rem] border border-neutral-200/70 bg-white shadow-xl">
-                  <div className="aspect-square w-full">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="relative aspect-square w-full">
+                    <Image
                       src={heroImg}
-                      alt=""
-                      className="h-full w-full object-cover"
+                      alt={site.name}
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 100vw, 480px"
+                      className="object-cover"
                     />
                   </div>
                 </div>

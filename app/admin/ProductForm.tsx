@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { comprimirImagen } from "@/lib/comprimirImagen";
 import { saveProducto, deleteProducto } from "./actions";
 import type { Opciones, Producto } from "@/lib/types";
 
@@ -82,11 +83,15 @@ export default function ProductForm({
       const supabase = createClient();
       const nuevas: string[] = [];
       for (const file of files) {
-        const ext = file.name.split(".").pop() ?? "jpg";
-        const path = `${crypto.randomUUID()}.${ext}`;
+        const optimizada = await comprimirImagen(file);
+        const path = `${crypto.randomUUID()}.webp`;
         const { error: upErr } = await supabase.storage
           .from("productos")
-          .upload(path, file, { cacheControl: "3600", upsert: false });
+          .upload(path, optimizada, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: optimizada.type,
+          });
         if (upErr) throw new Error(`Subiendo imagen: ${upErr.message}`);
         nuevas.push(
           supabase.storage.from("productos").getPublicUrl(path).data.publicUrl

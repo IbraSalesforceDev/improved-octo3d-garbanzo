@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Producto } from "@/lib/types";
 import PedidoBox from "./PedidoBox";
 
@@ -12,11 +13,12 @@ export default function ProductCard({ producto }: { producto: Producto }) {
         className="relative block aspect-square w-full overflow-hidden bg-gradient-to-br from-neutral-100 to-neutral-200"
       >
         {producto.imagen_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={producto.imagen_url}
             alt={producto.nombre}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-neutral-300">
