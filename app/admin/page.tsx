@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import type { Producto } from "@/lib/types";
 import AdminHeader from "./AdminHeader";
-import ProductoRow from "./ProductoRow";
+import ProductosAdminList from "./ProductosAdminList";
 
 export const dynamic = "force-dynamic";
 
@@ -32,8 +32,9 @@ export default async function AdminPage() {
       </div>
 
       <p className="mb-4 text-sm text-neutral-500">
-        Usa ▲▼ para ordenar y ★ para destacar. El orden se refleja en el
-        catálogo (los destacados salen primero).
+        Arrastra <span className="text-neutral-400">⠿</span> para ordenar y pulsa
+        ★ para destacar. El orden se refleja en el catálogo (los destacados salen
+        primero).
       </p>
 
       {error && (
@@ -47,16 +48,7 @@ export default async function AdminPage() {
           Todavía no hay productos. Crea el primero con “+ Nuevo producto”.
         </p>
       ) : (
-        <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
-          {productos.map((p, i) => (
-            <ProductoRow
-              key={p.id}
-              producto={p}
-              isFirst={i === 0}
-              isLast={i === productos.length - 1}
-            />
-          ))}
-        </ul>
+        <ProductosAdminList productos={productos} />
       )}
     </>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { CartProvider } from "@/components/cart/CartContext";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${poppins.className} min-h-screen antialiased`}>
-        {children}
+        <CartProvider>{children}</CartProvider>
         <Analytics />
       </body>
     </html>

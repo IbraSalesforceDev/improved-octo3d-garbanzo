@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Brand from "@/components/Brand";
+import CartButton from "@/components/cart/CartButton";
 
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -24,14 +25,18 @@ export default function SiteHeader() {
         <a href="/#top" aria-label="Inicio" className="flex items-center">
           <Brand iconSize="h-9 w-9" />
         </a>
-        <a
-          href="/#catalogo"
-          className="inline-flex min-h-[44px] items-center rounded-full bg-[var(--morado)] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--morado-claro)] sm:px-6"
-        >
-          Ver catálogo
-        </a>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <a
+            href="/#catalogo"
+            className="inline-flex min-h-[44px] items-center rounded-full bg-[var(--morado)] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--morado-claro)] sm:px-6"
+          >
+            Ver catálogo
+          </a>
+          <CartButton />
+        </div>
       </div>
     </header>
   );
 }
+
 

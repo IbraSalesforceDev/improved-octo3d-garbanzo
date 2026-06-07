@@ -1,12 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import type { Producto } from "@/lib/types";
 import { formatEUR } from "@/lib/precio";
 import { usePedido } from "@/hooks/usePedido";
+import { useCart } from "@/components/cart/CartContext";
 
 export default function PedidoBox({ producto }: { producto: Producto }) {
-  const { grupos, seleccion, elegir, precioFinal, copiado, copiar } =
-    usePedido(producto);
+  const { grupos, seleccion, elegir, precioFinal } = usePedido(producto);
+  const { addItem, setOpen } = useCart();
+
+  const [cantidad, setCantidad] = useState(1);
+  const [anadido, setAnadido] = useState(false);
+
+  function anadir() {
+    addItem(
+      {
+        productoId: producto.id,
+        nombre: producto.nombre,
+        opciones: seleccion,
+        precioUnitario: precioFinal,
+      },
+      cantidad
+    );
+    setAnadido(true);
+    setCantidad(1);
+    setTimeout(() => setAnadido(false), 1800);
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -56,52 +76,54 @@ export default function PedidoBox({ producto }: { producto: Producto }) {
         </span>
       </div>
 
-      <button
-        type="button"
-        onClick={copiar}
-        className={
-          "flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] " +
-          (copiado
-            ? "bg-emerald-600"
-            : "bg-[var(--morado)] hover:bg-[var(--morado-claro)]")
-        }
-      >
-        {copiado ? (
-          <>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="h-4 w-4"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 12.75l6 6 9-13.5"
-              />
-            </svg>
-            ¡Pedido copiado!
-          </>
-        ) : (
-          <>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="h-4 w-4"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"
-              />
-            </svg>
-            Copiar pedido
-          </>
-        )}
-      </button>
+      <div className="flex items-stretch gap-2">
+        {/* Cantidad */}
+        <div className="flex items-center rounded-xl border border-neutral-200">
+          <button
+            type="button"
+            onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+            className="px-3 text-lg text-neutral-600 hover:bg-neutral-50"
+            aria-label="Menos"
+          >
+            −
+          </button>
+          <span className="min-w-[2ch] text-center text-sm font-medium">
+            {cantidad}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCantidad((c) => c + 1)}
+            className="px-3 text-lg text-neutral-600 hover:bg-neutral-50"
+            aria-label="Más"
+          >
+            +
+          </button>
+        </div>
+
+        {/* Añadir al carrito */}
+        <button
+          type="button"
+          onClick={anadir}
+          className={
+            "flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] " +
+            (anadido
+              ? "bg-emerald-600"
+              : "bg-[var(--morado)] hover:bg-[var(--morado-claro)]")
+          }
+        >
+          {anadido ? "Añadido ✓" : "Añadir al carrito"}
+        </button>
+      </div>
+
+      {anadido && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="-mt-1 text-center text-xs font-medium text-[var(--morado)] hover:underline"
+        >
+          Ver carrito
+        </button>
+      )}
     </div>
   );
 }

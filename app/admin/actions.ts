@@ -77,30 +77,13 @@ export async function toggleDestacado(id: string, destacado: boolean) {
   revalidar();
 }
 
-// Sube o baja un producto en el orden, renumerando toda la secuencia.
-export async function moverProducto(id: string, dir: "subir" | "bajar") {
+// Guarda el nuevo orden de los productos (orden = posición en la lista).
+export async function reordenar(ids: string[]) {
   const supabase = await getAuthedClient();
-
-  const { data } = await supabase
-    .from("productos")
-    .select("id")
-    .order("orden", { ascending: true })
-    .order("created_at", { ascending: false });
-  if (!data) return;
-
-  const ids = data.map((r) => r.id as string);
-  const i = ids.indexOf(id);
-  if (i === -1) return;
-  const j = dir === "subir" ? i - 1 : i + 1;
-  if (j < 0 || j >= ids.length) return;
-
-  [ids[i], ids[j]] = [ids[j], ids[i]];
-
   await Promise.all(
-    ids.map((pid, idx) =>
-      supabase.from("productos").update({ orden: idx }).eq("id", pid)
+    ids.map((id, idx) =>
+      supabase.from("productos").update({ orden: idx }).eq("id", id)
     )
   );
-
   revalidar();
 }
