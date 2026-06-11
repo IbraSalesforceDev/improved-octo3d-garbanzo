@@ -32,14 +32,22 @@ export default async function AdminPage() {
     <>
       <AdminHeader />
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Productos ({productos.length})</h1>
-        <Link
-          href="/admin/nuevo"
-          className="rounded-xl bg-[var(--morado)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--morado-claro)]"
-        >
-          + Nuevo producto
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/estadisticas"
+            className="rounded-xl border border-neutral-200 px-3 py-2 text-sm font-semibold text-[var(--morado)] transition hover:bg-neutral-50"
+          >
+            📊 Estadísticas
+          </Link>
+          <Link
+            href="/admin/nuevo"
+            className="rounded-xl bg-[var(--morado)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--morado-claro)]"
+          >
+            + Nuevo producto
+          </Link>
+        </div>
       </div>
 
       <p className="mb-4 text-sm text-neutral-500">

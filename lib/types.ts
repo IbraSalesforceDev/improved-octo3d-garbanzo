@@ -16,6 +16,7 @@ export interface Producto {
   categoria: string | null;
   orden: number;
   destacado: boolean;
+  copias: number;
   activo: boolean;
   created_at: string;
 }

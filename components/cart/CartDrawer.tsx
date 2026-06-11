@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCart } from "./CartContext";
 import { formatEUR } from "@/lib/precio";
+import { registrarCopias } from "@/lib/stats";
 
 export default function CartDrawer() {
   const { items, open, setOpen, updateQty, removeItem, clear, total, mensaje } =
@@ -10,6 +11,10 @@ export default function CartDrawer() {
   const [copiado, setCopiado] = useState(false);
 
   async function copiar() {
+    // Registra el interés por cada pieza (no bloquea la copia).
+    registrarCopias(
+      items.map((i) => ({ productoId: i.productoId, cantidad: i.cantidad }))
+    );
     try {
       await navigator.clipboard.writeText(mensaje());
       setCopiado(true);
