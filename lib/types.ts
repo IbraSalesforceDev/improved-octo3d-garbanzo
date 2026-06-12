@@ -21,7 +21,17 @@ export interface Producto {
   created_at: string;
 }
 
-// Datos que envía el formulario de admin al crear/editar un producto.
+// Venta REAL registrada a mano por el admin (pedido confirmado).
+export interface Venta {
+  id: string;
+  producto_id: string | null;
+  nombre: string;
+  cantidad: number;
+  precio_unitario: number;
+  total: number;
+  nota: string | null;
+  created_at: string;
+}
 export interface ProductoInput {
   id?: string;
   nombre: string;

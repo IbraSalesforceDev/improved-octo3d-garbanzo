@@ -77,6 +77,37 @@ export async function toggleDestacado(id: string, destacado: boolean) {
   revalidar();
 }
 
+// --- Ventas reales (registro manual) ---------------------------------------
+export async function registrarVenta(input: {
+  producto_id: string | null;
+  nombre: string;
+  cantidad: number;
+  precio_unitario: number;
+  nota: string | null;
+}) {
+  const supabase = await getAuthedClient();
+  const cantidad = Math.max(1, Math.round(input.cantidad));
+  const total = Number((input.precio_unitario * cantidad).toFixed(2));
+
+  const { error } = await supabase.from("ventas").insert({
+    producto_id: input.producto_id,
+    nombre: input.nombre,
+    cantidad,
+    precio_unitario: input.precio_unitario,
+    total,
+    nota: input.nota,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/estadisticas");
+}
+
+export async function eliminarVenta(id: string) {
+  const supabase = await getAuthedClient();
+  const { error } = await supabase.from("ventas").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/estadisticas");
+}
+
 // Guarda el nuevo orden de los productos (orden = posición en la lista).
 export async function reordenar(ids: string[]) {
   const supabase = await getAuthedClient();
