@@ -28,6 +28,7 @@ export default async function EstadisticasPage() {
     .sort((a, b) => b.ingreso - a.ingreso);
 
   const maxIngreso = Math.max(1, ...filas.map((f) => f.ingreso));
+  const maxCopias = Math.max(1, ...filas.map((f) => f.copias));
   const totalCopias = filas.reduce((n, f) => n + f.copias, 0);
   const totalIngreso = filas.reduce((s, f) => s + f.ingreso, 0);
 
@@ -61,27 +62,51 @@ export default async function EstadisticasPage() {
         </div>
       </div>
 
-      {filas.length === 0 ? (
-        <p className="text-neutral-600">Aún no hay datos.</p>
+      {filas.length === 0 || totalCopias === 0 ? (
+        <p className="text-neutral-600">
+          Aún no hay datos. Aparecerán cuando los clientes copien pedidos desde el
+          catálogo.
+        </p>
       ) : (
-        <div className="flex flex-col gap-4">
-          {filas.map(({ p, copias, ingreso }) => (
-            <div key={p.id}>
-              <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-                <span className="truncate font-medium">{p.nombre}</span>
-                <span className="shrink-0 text-neutral-500">
-                  {copias}× · {formatEUR(ingreso)}
-                </span>
+        <>
+          <div className="mb-5 flex items-center gap-4 text-xs text-neutral-500">
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded bg-[var(--morado)]" />
+              Ingreso estimado
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded bg-[var(--lima)]" />
+              Veces pedido
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-5">
+            {filas.map(({ p, copias, ingreso }) => (
+              <div key={p.id}>
+                <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate font-medium">{p.nombre}</span>
+                  <span className="shrink-0 text-neutral-500">
+                    {copias}× · {formatEUR(ingreso)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-100">
+                    <div
+                      className="h-3 rounded-full bg-[var(--morado)]"
+                      style={{ width: `${(ingreso / maxIngreso) * 100}%` }}
+                    />
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                    <div
+                      className="h-2 rounded-full bg-[var(--lima)]"
+                      style={{ width: `${(copias / maxCopias) * 100}%` }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-100">
-                <div
-                  className="h-3 rounded-full bg-[var(--morado)]"
-                  style={{ width: `${(ingreso / maxIngreso) * 100}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
     </>
   );

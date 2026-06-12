@@ -11,6 +11,12 @@ export default function AdminHeader() {
       </Link>
       <div className="flex items-center gap-3">
         <Link
+          href="/admin/estadisticas"
+          className="text-sm font-medium text-[var(--morado)] hover:underline"
+        >
+          Estadísticas
+        </Link>
+        <Link
           href="/"
           target="_blank"
           className="text-sm text-neutral-600 hover:underline"
