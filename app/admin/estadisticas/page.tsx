@@ -6,6 +6,7 @@ import type { Producto, Venta } from "@/lib/types";
 import AdminHeader from "../AdminHeader";
 import RegistrarVentaForm from "./RegistrarVentaForm";
 import BorrarVentaButton from "./BorrarVentaButton";
+import ExportarCSVButton from "./ExportarCSVButton";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,13 @@ function Barra({
   );
 }
 
-export default async function EstadisticasPage() {
+export default async function EstadisticasPage({
+  searchParams,
+}: {
+  searchParams: { desde?: string; hasta?: string };
+}) {
+  const desde = searchParams.desde || "";
+  const hasta = searchParams.hasta || "";
   const supabase = createClient(await cookies());
 
   // Productos (para previsión y para el formulario de ventas).
@@ -45,9 +52,27 @@ export default async function EstadisticasPage() {
     .select("*")
     .order("created_at", { ascending: false });
   const ventasFaltaMigracion = Boolean(vres.error);
-  const ventas = (vres.data ?? []) as Venta[];
+  const ventasTodas = (vres.data ?? []) as Venta[];
 
-  // --- Realidad (ventas) ---
+  const enRango = (iso: string) => {
+    const d = iso.slice(0, 10);
+    if (desde && d < desde) return false;
+    if (hasta && d > hasta) return false;
+    return true;
+  };
+  const ventas = ventasTodas.filter((v) => enRango(v.created_at));
+
+  // Total del mes en curso (independiente del filtro de fechas).
+  const ahora = new Date();
+  const ym = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}`;
+  const ingresoMes = ventasTodas
+    .filter((v) => v.created_at.slice(0, 7) === ym)
+    .reduce((s, v) => s + Number(v.total), 0);
+
+  // --- Realidad (ventas, ya filtradas por fecha) ---
   const mapaReal = new Map<
     string,
     { nombre: string; unidades: number; ingreso: number }
@@ -115,14 +140,60 @@ export default async function EstadisticasPage() {
           </div>
         ) : (
           <>
-            <div className="mb-5 grid grid-cols-2 gap-4">
+            {/* Filtro por fechas */}
+            <form className="mb-5 flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-neutral-500">
+                  Desde
+                </label>
+                <input
+                  type="date"
+                  name="desde"
+                  defaultValue={desde}
+                  className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-neutral-500">
+                  Hasta
+                </label>
+                <input
+                  type="date"
+                  name="hasta"
+                  defaultValue={hasta}
+                  className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                className="rounded-lg bg-[var(--morado)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--morado-claro)]"
+              >
+                Filtrar
+              </button>
+              {(desde || hasta) && (
+                <Link
+                  href="/admin/estadisticas"
+                  className="text-sm text-neutral-500 hover:underline"
+                >
+                  Limpiar
+                </Link>
+              )}
+            </form>
+
+            <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div className="rounded-xl border border-neutral-200 bg-white p-4">
-                <p className="text-sm text-neutral-500">Ingreso real</p>
+                <p className="text-sm text-neutral-500">
+                  Ingreso real{desde || hasta ? " (rango)" : ""}
+                </p>
                 <p className="text-2xl font-bold">{formatEUR(ingresoReal)}</p>
               </div>
               <div className="rounded-xl border border-neutral-200 bg-white p-4">
                 <p className="text-sm text-neutral-500">Unidades vendidas</p>
                 <p className="text-2xl font-bold">{unidadesReales}</p>
+              </div>
+              <div className="rounded-xl border border-neutral-200 bg-white p-4">
+                <p className="text-sm text-neutral-500">Este mes</p>
+                <p className="text-2xl font-bold">{formatEUR(ingresoMes)}</p>
               </div>
             </div>
 
@@ -148,9 +219,12 @@ export default async function EstadisticasPage() {
 
             {ventas.length > 0 && (
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-neutral-600">
-                  Últimas ventas
-                </h3>
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-neutral-600">
+                    Últimas ventas
+                  </h3>
+                  <ExportarCSVButton ventas={ventas} />
+                </div>
                 <ul className="divide-y divide-neutral-100 rounded-xl border border-neutral-200 bg-white">
                   {ventas.slice(0, 20).map((v) => (
                     <li
