@@ -29,6 +29,42 @@ function Barra({
   );
 }
 
+function Donut({
+  data,
+}: {
+  data: { label: string; value: number; color: string }[];
+}) {
+  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  const r = 60;
+  const C = 2 * Math.PI * r;
+  let offset = 0;
+  return (
+    <svg viewBox="0 0 160 160" className="h-36 w-36 shrink-0">
+      <g transform="rotate(-90 80 80)">
+        <circle cx="80" cy="80" r={r} fill="none" stroke="#f1f1f4" strokeWidth="22" />
+        {data.map((d, i) => {
+          const len = (d.value / total) * C;
+          const el = (
+            <circle
+              key={i}
+              cx="80"
+              cy="80"
+              r={r}
+              fill="none"
+              stroke={d.color}
+              strokeWidth="22"
+              strokeDasharray={`${len} ${C - len}`}
+              strokeDashoffset={-offset}
+            />
+          );
+          offset += len;
+          return el;
+        })}
+      </g>
+    </svg>
+  );
+}
+
 export default async function EstadisticasPage({
   searchParams,
 }: {
@@ -475,26 +511,28 @@ export default async function EstadisticasPage({
               <h3 className="mb-3 text-sm font-semibold text-neutral-600">
                 Reparto de ingresos{desde || hasta ? " (rango)" : ""}
               </h3>
-              <div className="flex h-5 w-full overflow-hidden rounded-full bg-neutral-100">
-                {repRows.map((r) => (
-                  <div
-                    key={r.key}
-                    style={{ width: `${r.pct}%`, backgroundColor: r.color }}
-                    title={`${r.nombre}: ${r.pct.toFixed(0)}%`}
-                  />
-                ))}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
-                {repRows.map((r) => (
-                  <span key={r.key} className="flex items-center gap-1.5">
-                    <span
-                      className="h-3 w-3 rounded"
-                      style={{ backgroundColor: r.color }}
-                    />
-                    {r.nombre}{" "}
-                    <b className="text-[var(--tinta)]">{r.pct.toFixed(0)}%</b>
-                  </span>
-                ))}
+              <div className="flex flex-wrap items-center gap-6">
+                <Donut
+                  data={repRows.map((r) => ({
+                    label: r.nombre,
+                    value: r.ingreso,
+                    color: r.color,
+                  }))}
+                />
+                <div className="flex flex-col gap-1 text-sm">
+                  {repRows.map((r) => (
+                    <span key={r.key} className="flex items-center gap-2">
+                      <span
+                        className="h-3 w-3 rounded"
+                        style={{ backgroundColor: r.color }}
+                      />
+                      <span className="text-neutral-600">{r.nombre}</span>
+                      <b className="text-[var(--tinta)]">
+                        {r.pct.toFixed(0)}%
+                      </b>
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -519,6 +557,30 @@ export default async function EstadisticasPage({
             <p className="text-2xl font-bold">{formatEUR(ingresoPrev)}</p>
           </div>
         </div>
+
+        {prevRows.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-6">
+            <Donut
+              data={prevRows.map((r, i) => ({
+                label: r.nombre,
+                value: r.copias,
+                color: colores[i % colores.length],
+              }))}
+            />
+            <div className="flex flex-col gap-1 text-sm">
+              {prevRows.map((r, i) => (
+                <span key={r.id} className="flex items-center gap-2">
+                  <span
+                    className="h-3 w-3 rounded"
+                    style={{ backgroundColor: colores[i % colores.length] }}
+                  />
+                  <span className="text-neutral-600">{r.nombre}</span>
+                  <b className="text-[var(--tinta)]">{r.copias}×</b>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {prevRows.length === 0 ? (
           <p className="text-neutral-600">
