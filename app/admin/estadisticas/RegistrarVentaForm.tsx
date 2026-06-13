@@ -92,7 +92,10 @@ export default function RegistrarVentaForm({ productos }: { productos: Opc[] }) 
             type="number"
             min="1"
             value={cantidad}
-            onChange={(e) => setCantidad(Math.max(1, Number(e.target.value)))}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              setCantidad(Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1);
+            }}
             className={inputCls}
           />
         </div>

@@ -55,6 +55,23 @@ function claveLinea(productoId: string, opciones: Record<string, string>) {
 
 const STORAGE_KEY = "carrito";
 
+// Valida cada línea del carrito leída de localStorage (puede estar corrupta
+// o venir de una versión antigua de la app).
+function esItemValido(x: unknown): x is CartItem {
+  if (!x || typeof x !== "object") return false;
+  const i = x as Record<string, unknown>;
+  return (
+    typeof i.key === "string" &&
+    typeof i.productoId === "string" &&
+    typeof i.nombre === "string" &&
+    typeof i.opciones === "object" &&
+    i.opciones !== null &&
+    Number.isFinite(i.precioUnitario) &&
+    Number.isInteger(i.cantidad) &&
+    (i.cantidad as number) > 0
+  );
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
@@ -64,7 +81,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setItems(parsed.filter(esItemValido));
+      }
     } catch {
       // ignore
     }

@@ -86,16 +86,23 @@ export async function registrarVenta(input: {
   nota: string | null;
 }) {
   const supabase = await getAuthedClient();
-  const cantidad = Math.max(1, Math.round(input.cantidad));
-  const total = Number((input.precio_unitario * cantidad).toFixed(2));
+  const cantidad =
+    Number.isFinite(input.cantidad) && input.cantidad >= 1
+      ? Math.round(input.cantidad)
+      : 1;
+  const precio = Number(input.precio_unitario);
+  if (!Number.isFinite(precio) || precio < 0) {
+    throw new Error("Precio no válido.");
+  }
+  const total = Number((precio * cantidad).toFixed(2));
 
   const { error } = await supabase.from("ventas").insert({
     producto_id: input.producto_id,
     nombre: input.nombre,
     cantidad,
-    precio_unitario: input.precio_unitario,
+    precio_unitario: precio,
     total,
-    nota: input.nota,
+    nota: input.nota ? input.nota.slice(0, 300) : null,
   });
   if (error) throw new Error(error.message);
   revalidatePath("/admin/estadisticas");

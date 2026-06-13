@@ -21,11 +21,16 @@ create table if not exists productos (
 -- La app usa la clave anon, así que necesitamos una política que permita SELECT.
 alter table productos enable row level security;
 
+-- El público (anon) solo ve productos activos; el admin (autenticado) ve todos.
 drop policy if exists "Lectura publica de productos" on productos;
-create policy "Lectura publica de productos"
-  on productos
-  for select
-  using (true);
+
+drop policy if exists "Lectura publica productos activos" on productos;
+create policy "Lectura publica productos activos"
+  on productos for select to anon using (activo = true);
+
+drop policy if exists "Lectura admin productos" on productos;
+create policy "Lectura admin productos"
+  on productos for select to authenticated using (true);
 
 -- NOTA: No creamos políticas de INSERT/UPDATE/DELETE a propósito. Con la clave
 -- anon nadie podrá modificar el catálogo. La gestión la harás desde el panel de

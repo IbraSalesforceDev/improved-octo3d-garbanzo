@@ -72,6 +72,19 @@ export default async function EstadisticasPage({
     .filter((v) => v.created_at.slice(0, 7) === ym)
     .reduce((s, v) => s + Number(v.total), 0);
 
+  // Ingresos reales por mes (últimos 6 meses).
+  const meses = Array.from({ length: 6 }, (_, idx) => {
+    const d = new Date(ahora.getFullYear(), ahora.getMonth() - (5 - idx), 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return {
+      label: d.toLocaleDateString("es-ES", { month: "short" }),
+      ingreso: ventasTodas
+        .filter((v) => v.created_at.slice(0, 7) === key)
+        .reduce((s, v) => s + Number(v.total), 0),
+    };
+  });
+  const maxMes = Math.max(1, ...meses.map((m) => m.ingreso));
+
   // --- Realidad (ventas, ya filtradas por fecha) ---
   const mapaReal = new Map<
     string,
@@ -88,14 +101,32 @@ export default async function EstadisticasPage({
     cur.ingreso += Number(v.total);
     mapaReal.set(key, cur);
   }
-  const realRows = [...mapaReal.values()].sort((a, b) => b.ingreso - a.ingreso);
+  const realRows = [...mapaReal.entries()]
+    .map(([key, v]) => ({ key, ...v }))
+    .sort((a, b) => b.ingreso - a.ingreso);
   const maxReal = Math.max(1, ...realRows.map((r) => r.ingreso));
   const unidadesReales = ventas.reduce((n, v) => n + v.cantidad, 0);
   const ingresoReal = ventas.reduce((s, v) => s + Number(v.total), 0);
 
+  // Ventas reales por categoría (usa la categoría actual del producto).
+  const catProducto = new Map(
+    productos.map((p) => [p.id, p.categoria ?? "Sin categoría"])
+  );
+  const mapaCat = new Map<string, number>();
+  for (const v of ventas) {
+    const cat =
+      (v.producto_id && catProducto.get(v.producto_id)) || "Sin categoría";
+    mapaCat.set(cat, (mapaCat.get(cat) ?? 0) + Number(v.total));
+  }
+  const catRows = [...mapaCat.entries()]
+    .map(([cat, ingreso]) => ({ cat, ingreso }))
+    .sort((a, b) => b.ingreso - a.ingreso);
+  const maxCat = Math.max(1, ...catRows.map((r) => r.ingreso));
+
   // --- Previsión (interés / copias) ---
   const prevRows = productos
     .map((p) => ({
+      id: p.id,
       nombre: p.nombre,
       copias: p.copias ?? 0,
       ingreso: (p.copias ?? 0) * Number(p.precio_base),
@@ -117,7 +148,7 @@ export default async function EstadisticasPage({
       <AdminHeader />
 
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Estadísticas</h1>
+        <h1 className="text-2xl font-bold">Reportes</h1>
         <Link
           href="/admin"
           className="text-sm font-medium text-[var(--morado)] hover:underline"
@@ -204,7 +235,7 @@ export default async function EstadisticasPage({
             {realRows.length > 0 && (
               <div className="mb-6 flex flex-col gap-4">
                 {realRows.map((r) => (
-                  <div key={r.nombre}>
+                  <div key={r.key}>
                     <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                       <span className="truncate font-medium">{r.nombre}</span>
                       <span className="shrink-0 text-neutral-500">
@@ -214,6 +245,64 @@ export default async function EstadisticasPage({
                     <Barra valor={r.ingreso} max={maxReal} color="#6d28d9" />
                   </div>
                 ))}
+              </div>
+            )}
+
+            {ventas.length > 0 && (
+              <div className="mb-8 grid gap-8 md:grid-cols-2">
+                {/* Ingresos por mes */}
+                <div>
+                  <h3 className="mb-3 text-sm font-semibold text-neutral-600">
+                    Ingresos por mes
+                  </h3>
+                  <div className="flex h-40 items-end gap-2">
+                    {meses.map((m) => (
+                      <div
+                        key={m.label}
+                        className="flex flex-1 flex-col items-center gap-1"
+                      >
+                        <div className="flex w-full flex-1 items-end">
+                          <div
+                            className="w-full rounded-t bg-[var(--morado)]"
+                            style={{
+                              height: `${(m.ingreso / maxMes) * 100}%`,
+                            }}
+                            title={formatEUR(m.ingreso)}
+                          />
+                        </div>
+                        <span className="text-[11px] capitalize text-neutral-400">
+                          {m.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Ingresos por categoría */}
+                <div>
+                  <h3 className="mb-3 text-sm font-semibold text-neutral-600">
+                    Ingresos por categoría
+                  </h3>
+                  {catRows.length === 0 ? (
+                    <p className="text-sm text-neutral-400">Sin datos.</p>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {catRows.map((r) => (
+                        <div key={r.cat}>
+                          <div className="mb-1 flex items-center justify-between text-sm">
+                            <span className="truncate font-medium">
+                              {r.cat}
+                            </span>
+                            <span className="shrink-0 text-neutral-500">
+                              {formatEUR(r.ingreso)}
+                            </span>
+                          </div>
+                          <Barra valor={r.ingreso} max={maxCat} color="#6d28d9" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -282,7 +371,7 @@ export default async function EstadisticasPage({
         ) : (
           <div className="flex flex-col gap-4">
             {prevRows.map((r) => (
-              <div key={r.nombre}>
+              <div key={r.id}>
                 <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                   <span className="truncate font-medium">{r.nombre}</span>
                   <span className="shrink-0 text-neutral-500">

@@ -13,7 +13,7 @@ language sql
 security definer
 set search_path = public
 as $$
-  update productos set copias = copias + greatest(n, 0) where id = prod_id;
+  update productos set copias = copias + least(greatest(n, 0), 100) where id = prod_id;
 $$;
 
 grant execute on function public.incrementar_copias(uuid, integer) to anon, authenticated;
