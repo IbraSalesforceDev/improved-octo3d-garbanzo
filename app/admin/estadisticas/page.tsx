@@ -123,6 +123,62 @@ export default async function EstadisticasPage({
     .sort((a, b) => b.ingreso - a.ingreso);
   const maxCat = Math.max(1, ...catRows.map((r) => r.ingreso));
 
+  // Comparativa interés (copias) vs ventas reales (unidades), por producto.
+  const unidadesPorProd = new Map<string, number>();
+  for (const v of ventasTodas) {
+    if (v.producto_id)
+      unidadesPorProd.set(
+        v.producto_id,
+        (unidadesPorProd.get(v.producto_id) ?? 0) + v.cantidad
+      );
+  }
+  const compRows = productos
+    .map((p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      copias: p.copias ?? 0,
+      unidades: unidadesPorProd.get(p.id) ?? 0,
+    }))
+    .filter((r) => r.copias > 0 || r.unidades > 0)
+    .sort((a, b) => b.copias + b.unidades - (a.copias + a.unidades))
+    .slice(0, 8);
+  const maxComp = Math.max(
+    1,
+    ...compRows.map((r) => Math.max(r.copias, r.unidades))
+  );
+
+  // Reparto de ingresos reales (% por producto, según el filtro de fechas).
+  const colores = [
+    "#6d28d9",
+    "#8b5cf6",
+    "#a78bfa",
+    "#c4b5fd",
+    "#84cc16",
+    "#22c55e",
+    "#f59e0b",
+    "#ec4899",
+  ];
+  const repRows = realRows.map((r, i) => ({
+    ...r,
+    pct: ingresoReal > 0 ? (r.ingreso / ingresoReal) * 100 : 0,
+    color: colores[i % colores.length],
+  }));
+
+  // Mejores ventas del mes en curso.
+  const mapaMes = new Map<string, { nombre: string; ingreso: number }>();
+  for (const v of ventasTodas) {
+    if (v.created_at.slice(0, 7) !== ym) continue;
+    const key = v.producto_id ?? `n:${v.nombre}`;
+    const cur = mapaMes.get(key) ?? { nombre: v.nombre, ingreso: 0 };
+    cur.ingreso += Number(v.total);
+    mapaMes.set(key, cur);
+  }
+  const mesRows = [...mapaMes.entries()]
+    .map(([key, v]) => ({ key, ...v }))
+    .sort((a, b) => b.ingreso - a.ingreso)
+    .slice(0, 5);
+  const maxMesProd = Math.max(1, ...mesRows.map((r) => r.ingreso));
+
   // --- Previsión (interés / copias) ---
   const prevRows = productos
     .map((p) => ({
@@ -344,6 +400,106 @@ export default async function EstadisticasPage({
           </>
         )}
       </section>
+
+      {/* ============ ANÁLISIS ============ */}
+      {(compRows.length > 0 || mesRows.length > 0) && (
+        <section className="mb-12">
+          <h2 className="mb-4 text-lg font-bold">Análisis</h2>
+
+          <div className="grid gap-8 md:grid-cols-2">
+            {/* Interés vs ventas */}
+            {compRows.length > 0 && (
+              <div>
+                <h3 className="mb-1 text-sm font-semibold text-neutral-600">
+                  Interés vs ventas (unidades)
+                </h3>
+                <div className="mb-3 flex items-center gap-4 text-xs text-neutral-500">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-3 w-3 rounded bg-[var(--lima)]" />
+                    Veces pedido
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-3 w-3 rounded bg-[var(--morado)]" />
+                    Vendidas
+                  </span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {compRows.map((r) => (
+                    <div key={r.id}>
+                      <div className="mb-1 flex justify-between text-sm">
+                        <span className="truncate font-medium">{r.nombre}</span>
+                        <span className="shrink-0 text-neutral-500">
+                          {r.copias}× · {r.unidades} ud
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Barra valor={r.copias} max={maxComp} color="#b6f23a" />
+                        <Barra
+                          valor={r.unidades}
+                          max={maxComp}
+                          color="#6d28d9"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Mejores ventas del mes */}
+            {mesRows.length > 0 && (
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-neutral-600">
+                  Mejores ventas del mes
+                </h3>
+                <div className="flex flex-col gap-3">
+                  {mesRows.map((r) => (
+                    <div key={r.key}>
+                      <div className="mb-1 flex justify-between text-sm">
+                        <span className="truncate font-medium">{r.nombre}</span>
+                        <span className="shrink-0 text-neutral-500">
+                          {formatEUR(r.ingreso)}
+                        </span>
+                      </div>
+                      <Barra valor={r.ingreso} max={maxMesProd} color="#6d28d9" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Reparto de ingresos */}
+          {repRows.length > 0 && ingresoReal > 0 && (
+            <div className="mt-8">
+              <h3 className="mb-3 text-sm font-semibold text-neutral-600">
+                Reparto de ingresos{desde || hasta ? " (rango)" : ""}
+              </h3>
+              <div className="flex h-5 w-full overflow-hidden rounded-full bg-neutral-100">
+                {repRows.map((r) => (
+                  <div
+                    key={r.key}
+                    style={{ width: `${r.pct}%`, backgroundColor: r.color }}
+                    title={`${r.nombre}: ${r.pct.toFixed(0)}%`}
+                  />
+                ))}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
+                {repRows.map((r) => (
+                  <span key={r.key} className="flex items-center gap-1.5">
+                    <span
+                      className="h-3 w-3 rounded"
+                      style={{ backgroundColor: r.color }}
+                    />
+                    {r.nombre}{" "}
+                    <b className="text-[var(--tinta)]">{r.pct.toFixed(0)}%</b>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ============ PREVISIÓN (INTERÉS) ============ */}
       <section>
