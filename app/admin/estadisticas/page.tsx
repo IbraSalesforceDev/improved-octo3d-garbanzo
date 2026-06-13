@@ -426,7 +426,11 @@ export default async function EstadisticasPage({
                         <span className="font-semibold">
                           {formatEUR(Number(v.total))}
                         </span>
-                        <BorrarVentaButton id={v.id} />
+                        <BorrarVentaButton
+                          id={v.id}
+                          nombre={v.nombre}
+                          total={Number(v.total)}
+                        />
                       </div>
                     </li>
                   ))}
