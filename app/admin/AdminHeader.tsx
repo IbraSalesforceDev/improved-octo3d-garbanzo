@@ -4,15 +4,18 @@ import LogoutButton from "./LogoutButton";
 
 export default function AdminHeader() {
   return (
-    <header className="mb-8 flex items-center justify-between">
+    <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
       <Link href="/admin" className="flex items-center gap-2">
         <Brand />
-        <span className="text-sm font-medium text-neutral-400">· Admin</span>
+        <span className="hidden text-sm font-medium text-neutral-400 sm:inline">
+          · Admin
+        </span>
       </Link>
-      <div className="flex items-center gap-3">
+
+      <div className="flex flex-wrap items-center gap-2">
         <Link
           href="/admin/estadisticas"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--morado)] px-3 py-1.5 text-sm font-semibold text-[var(--morado)] transition hover:bg-[var(--morado)] hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--morado)] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[var(--morado-claro)]"
         >
           <svg
             viewBox="0 0 24 24"
@@ -32,7 +35,7 @@ export default function AdminHeader() {
         <Link
           href="/"
           target="_blank"
-          className="text-sm text-neutral-600 hover:underline"
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-600 transition hover:bg-neutral-50"
         >
           Ver catálogo ↗
         </Link>
