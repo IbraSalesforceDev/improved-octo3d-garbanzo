@@ -21,7 +21,12 @@ export default function ExportarCSVButton({ ventas }: { ventas: Venta[] }) {
       v.nota ?? "",
     ]);
 
-    const escapar = (c: string) => `"${c.replace(/"/g, '""')}"`;
+    // Antepone un apóstrofo a celdas que empiezan por caracteres de fórmula
+    // para evitar inyección de fórmulas al abrir el CSV en Excel/Sheets.
+    const escapar = (c: string) => {
+      const seguro = /^[=+\-@\t\r]/.test(c) ? `'${c}` : c;
+      return `"${seguro.replace(/"/g, '""')}"`;
+    };
     const csv = [cabecera, ...filas]
       .map((f) => f.map(escapar).join(","))
       .join("\n");
