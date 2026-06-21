@@ -66,6 +66,9 @@ export default function ProductForm({
     return [];
   });
   const [subiendo, setSubiendo] = useState(false);
+  const [imagenesColor, setImagenesColor] = useState<Record<string, string>>(
+    producto?.imagenes_color ?? {}
+  );
   const [grupos, setGrupos] = useState<Grupo[]>(
     producto ? opcionesToGrupos(producto.opciones) : []
   );
@@ -103,6 +106,31 @@ export default function ProductForm({
     } finally {
       setSubiendo(false);
       e.target.value = "";
+    }
+  }
+
+  async function subirImagenColor(color: string, file: File) {
+    setSubiendo(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const optimizada = await comprimirImagen(file);
+      const path = `${crypto.randomUUID()}.webp`;
+      const { error: upErr } = await supabase.storage
+        .from("productos")
+        .upload(path, optimizada, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: optimizada.type,
+        });
+      if (upErr) throw new Error(`Subiendo imagen: ${upErr.message}`);
+      const url = supabase.storage.from("productos").getPublicUrl(path).data
+        .publicUrl;
+      setImagenesColor((prev) => ({ ...prev, [color]: url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al subir la imagen.");
+    } finally {
+      setSubiendo(false);
     }
   }
 
@@ -161,6 +189,14 @@ export default function ProductForm({
       )
     );
 
+  // Colores definidos en el grupo "color" (para asignarles foto).
+  const grupoColor = grupos.find((g) => /color/i.test(g.nombre));
+  const coloresChoices = grupoColor
+    ? Array.from(
+        new Set(grupoColor.choices.map((c) => c.opcion.trim()).filter(Boolean))
+      )
+    : [];
+
   // --- Guardar --------------------------------------------------------------
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -173,12 +209,18 @@ export default function ProductForm({
 
     setSaving(true);
     try {
+      const coloresSet = new Set(coloresChoices);
+      const imagenesColorLimpio = Object.fromEntries(
+        Object.entries(imagenesColor).filter(([k]) => coloresSet.has(k))
+      );
+
       await saveProducto({
         id: producto?.id,
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || null,
         precio_base: precio,
         imagenes,
+        imagenes_color: imagenesColorLimpio,
         opciones: gruposToOpciones(grupos),
         categoria: categoria.trim() || null,
         destacado,
@@ -426,6 +468,63 @@ export default function ProductForm({
           ))}
         </div>
       </div>
+
+      {/* Foto por color */}
+      {coloresChoices.length > 0 && (
+        <div>
+          <label className="mb-1 block text-sm font-medium">
+            Foto por color{" "}
+            <span className="font-normal text-neutral-400">(opcional)</span>
+          </label>
+          <p className="mb-2 text-xs text-neutral-400">
+            Asigna una foto a cada color; al elegirlo en la tienda, la imagen
+            cambiará.
+          </p>
+          <div className="flex flex-col gap-2">
+            {coloresChoices.map((color) => (
+              <div key={color} className="flex items-center gap-3">
+                <span className="w-24 shrink-0 text-sm capitalize">{color}</span>
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-neutral-100">
+                  {imagenesColor[color] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imagenesColor[color]}
+                      alt={color}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={subiendo}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) subirImagenColor(color, f);
+                    e.target.value = "";
+                  }}
+                  className="text-sm"
+                />
+                {imagenesColor[color] && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImagenesColor((prev) => {
+                        const n = { ...prev };
+                        delete n[color];
+                        return n;
+                      })
+                    }
+                    className="text-xs text-red-600 hover:underline"
+                  >
+                    Quitar
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {error && (
         <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">

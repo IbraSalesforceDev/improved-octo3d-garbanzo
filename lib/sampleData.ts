@@ -12,6 +12,7 @@ export const sampleProductos: Producto[] = [
     precio_base: 12,
     imagen_url: null,
     imagenes: [],
+    imagenes_color: {},
     opciones: {
       color: { blanco: 0, negro: 3, dorado: 5 },
       tamano: { S: 0, M: 5, L: 10 },
@@ -30,6 +31,7 @@ export const sampleProductos: Producto[] = [
     precio_base: 8,
     imagen_url: null,
     imagenes: [],
+    imagenes_color: {},
     opciones: {
       color: { blanco: 0, terracota: 2, verde: 2 },
     },
@@ -47,6 +49,7 @@ export const sampleProductos: Producto[] = [
     precio_base: 6,
     imagen_url: null,
     imagenes: [],
+    imagenes_color: {},
     opciones: {
       color: { negro: 0, azul: 1, rojo: 1 },
       acabado: { mate: 0, brillo: 2 },

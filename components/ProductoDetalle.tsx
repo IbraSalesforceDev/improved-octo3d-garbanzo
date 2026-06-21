@@ -1,23 +1,33 @@
+"use client";
+
 import type { Producto } from "@/lib/types";
-import PedidoBox from "./PedidoBox";
+import PedidoControls from "./PedidoControls";
 import ShareButton from "./ShareButton";
 import Galeria from "./Galeria";
+import { usePedido } from "@/hooks/usePedido";
 
 export default function ProductoDetalle({ producto }: { producto: Producto }) {
-  // Usa la galería si existe; si no, recurre a la imagen de portada.
-  const imagenes =
+  const { grupos, seleccion, elegir, precioFinal, imagenColor } =
+    usePedido(producto);
+
+  // Galería = fotos base + fotos por color (sin duplicados).
+  const base =
     producto.imagenes && producto.imagenes.length > 0
       ? producto.imagenes
       : producto.imagen_url
         ? [producto.imagen_url]
         : [];
+  const porColor = Object.values(producto.imagenes_color ?? {});
+  const imagenes = Array.from(new Set([...base, ...porColor]));
 
   return (
     <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-12">
-      {/* Galería */}
-      <Galeria imagenes={imagenes} nombre={producto.nombre} />
+      <Galeria
+        imagenes={imagenes}
+        nombre={producto.nombre}
+        principal={imagenColor ?? null}
+      />
 
-      {/* Información */}
       <div className="flex flex-col gap-5">
         <div>
           {producto.categoria && (
@@ -35,7 +45,13 @@ export default function ProductoDetalle({ producto }: { producto: Producto }) {
           )}
         </div>
 
-        <PedidoBox producto={producto} />
+        <PedidoControls
+          producto={producto}
+          grupos={grupos}
+          seleccion={seleccion}
+          elegir={elegir}
+          precioFinal={precioFinal}
+        />
 
         <div>
           <ShareButton title={producto.nombre} />

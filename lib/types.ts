@@ -12,6 +12,8 @@ export interface Producto {
   precio_base: number;
   imagen_url: string | null;
   imagenes: string[];
+  // Imagen por color: { "negro": url, ... }. Al elegir ese color, cambia la foto.
+  imagenes_color: Record<string, string>;
   opciones: Opciones;
   categoria: string | null;
   orden: number;
@@ -38,6 +40,7 @@ export interface ProductoInput {
   descripcion: string | null;
   precio_base: number;
   imagenes: string[];
+  imagenes_color: Record<string, string>;
   opciones: Opciones;
   categoria: string | null;
   destacado: boolean;

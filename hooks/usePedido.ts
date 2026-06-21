@@ -27,5 +27,12 @@ export function usePedido(producto: Producto) {
   const elegir = (grupo: string, opcion: string) =>
     setSeleccion((s) => ({ ...s, [grupo]: opcion }));
 
-  return { grupos, seleccion, elegir, precioFinal };
+  // Imagen asociada al color elegido (si la hay).
+  const grupoColor = grupos.find(([g]) => /color/i.test(g))?.[0];
+  const colorElegido = grupoColor ? seleccion[grupoColor] : undefined;
+  const imagenColor = colorElegido
+    ? producto.imagenes_color?.[colorElegido]
+    : undefined;
+
+  return { grupos, seleccion, elegir, precioFinal, imagenColor };
 }

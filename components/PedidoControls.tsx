@@ -1,15 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import type { Producto } from "@/lib/types";
+import type { Producto, Opciones } from "@/lib/types";
 import { formatEUR } from "@/lib/precio";
-import { usePedido } from "@/hooks/usePedido";
 import { useCart } from "@/components/cart/CartContext";
 
-export default function PedidoBox({ producto }: { producto: Producto }) {
-  const { grupos, seleccion, elegir, precioFinal } = usePedido(producto);
+export default function PedidoControls({
+  producto,
+  grupos,
+  seleccion,
+  elegir,
+  precioFinal,
+}: {
+  producto: Producto;
+  grupos: [string, Opciones[string]][];
+  seleccion: Record<string, string>;
+  elegir: (grupo: string, opcion: string) => void;
+  precioFinal: number;
+}) {
   const { addItem, setOpen } = useCart();
-
   const [cantidad, setCantidad] = useState(1);
   const [anadido, setAnadido] = useState(false);
 
@@ -77,7 +86,6 @@ export default function PedidoBox({ producto }: { producto: Producto }) {
       </div>
 
       <div className="flex items-stretch gap-2">
-        {/* Cantidad */}
         <div className="flex items-center rounded-xl border border-neutral-200">
           <button
             type="button"
@@ -100,7 +108,6 @@ export default function PedidoBox({ producto }: { producto: Producto }) {
           </button>
         </div>
 
-        {/* Añadir al carrito */}
         <button
           type="button"
           onClick={anadir}

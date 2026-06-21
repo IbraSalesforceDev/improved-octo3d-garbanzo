@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function Galeria({
   imagenes,
   nombre,
+  principal,
 }: {
   imagenes: string[];
   nombre: string;
+  principal?: string | null;
 }) {
   const [activa, setActiva] = useState(0);
+
+  // Cuando cambia la imagen forzada (p. ej. al elegir un color), salta a ella.
+  useEffect(() => {
+    if (!principal) return;
+    const idx = imagenes.indexOf(principal);
+    if (idx >= 0) setActiva(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [principal]);
 
   if (imagenes.length === 0) {
     return (
@@ -34,14 +44,14 @@ export default function Galeria({
     );
   }
 
-  const principal = imagenes[Math.min(activa, imagenes.length - 1)];
+  const imagenActiva = imagenes[Math.min(activa, imagenes.length - 1)];
 
   return (
     <div className="flex flex-col gap-3">
       <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-100">
         <div className="relative aspect-square w-full">
           <Image
-            src={principal}
+            src={imagenActiva}
             alt={nombre}
             fill
             priority

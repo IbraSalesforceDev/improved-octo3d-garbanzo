@@ -29,6 +29,7 @@ export async function saveProducto(input: ProductoInput) {
     // La portada del catálogo es la primera imagen de la galería.
     imagen_url: input.imagenes[0] ?? null,
     imagenes: input.imagenes,
+    imagenes_color: input.imagenes_color,
     opciones: input.opciones,
     categoria: input.categoria,
     destacado: input.destacado,

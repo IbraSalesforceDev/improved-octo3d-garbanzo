@@ -1,10 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import type { Producto } from "@/lib/types";
-import PedidoBox from "./PedidoBox";
+import PedidoControls from "./PedidoControls";
+import { usePedido } from "@/hooks/usePedido";
 
 export default function ProductCard({ producto }: { producto: Producto }) {
+  const { grupos, seleccion, elegir, precioFinal, imagenColor } =
+    usePedido(producto);
+
   const href = `/producto/${producto.id}`;
+  const portada = producto.imagenes?.[0] ?? producto.imagen_url;
+  const imagen = imagenColor ?? portada;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-neutral-200">
@@ -12,9 +20,9 @@ export default function ProductCard({ producto }: { producto: Producto }) {
         href={href}
         className="relative block aspect-square w-full overflow-hidden bg-gradient-to-br from-neutral-100 to-neutral-200"
       >
-        {producto.imagen_url ? (
+        {imagen ? (
           <Image
-            src={producto.imagen_url}
+            src={imagen}
             alt={producto.nombre}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -58,7 +66,13 @@ export default function ProductCard({ producto }: { producto: Producto }) {
           )}
         </div>
 
-        <PedidoBox producto={producto} />
+        <PedidoControls
+          producto={producto}
+          grupos={grupos}
+          seleccion={seleccion}
+          elegir={elegir}
+          precioFinal={precioFinal}
+        />
       </div>
     </article>
   );
