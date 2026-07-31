@@ -19,6 +19,39 @@ function revalidar() {
   revalidatePath("/");
 }
 
+// Columnas añadidas en migraciones posteriores: si alguna todavía no existe en
+// la base de datos, se guarda sin ella en vez de fallar.
+const COLUMNAS_OPCIONALES = [
+  "colores_hex",
+  "imagenes_color",
+  "imagenes",
+  "categoria",
+  "destacado",
+];
+
+// Reintenta la escritura quitando la columna que la base de datos no reconoce.
+async function escribirTolerante(
+  fila: Record<string, unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  escribir: (f: Record<string, unknown>) => PromiseLike<{ error: any }>
+) {
+  let actual = { ...fila };
+  for (let intento = 0; intento <= COLUMNAS_OPCIONALES.length; intento++) {
+    const { error } = await escribir(actual);
+    if (!error) return;
+
+    const falta = COLUMNAS_OPCIONALES.find(
+      (c) => c in actual && error.message.includes(c)
+    );
+    if (!falta) throw new Error(error.message);
+
+    console.warn(
+      `Columna "${falta}" no existe todavía; guardando sin ella. Ejecuta las migraciones de supabase/.`
+    );
+    delete actual[falta];
+  }
+}
+
 export async function saveProducto(input: ProductoInput) {
   const supabase = await getAuthedClient();
 
@@ -38,11 +71,9 @@ export async function saveProducto(input: ProductoInput) {
   };
 
   if (input.id) {
-    const { error } = await supabase
-      .from("productos")
-      .update(fila)
-      .eq("id", input.id);
-    if (error) throw new Error(error.message);
+    await escribirTolerante(fila, (f) =>
+      supabase.from("productos").update(f).eq("id", input.id as string)
+    );
   } else {
     // Los productos nuevos van al final del orden.
     const { data: ultimo } = await supabase
@@ -53,10 +84,9 @@ export async function saveProducto(input: ProductoInput) {
     const orden =
       ultimo && ultimo.length ? (ultimo[0].orden as number) + 1 : 0;
 
-    const { error } = await supabase
-      .from("productos")
-      .insert({ ...fila, orden });
-    if (error) throw new Error(error.message);
+    await escribirTolerante({ ...fila, orden }, (f) =>
+      supabase.from("productos").insert(f)
+    );
   }
 
   revalidar();
