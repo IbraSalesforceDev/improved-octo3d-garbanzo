@@ -7,7 +7,7 @@ import Galeria from "./Galeria";
 import { usePedido } from "@/hooks/usePedido";
 
 export default function ProductoDetalle({ producto }: { producto: Producto }) {
-  const { grupos, seleccion, elegir, precioFinal, imagenColor } =
+  const { grupos, seleccion, elegir, precioFinal, imagenColor, tintColor } =
     usePedido(producto);
 
   // Galería = fotos base + fotos por color (sin duplicados).
@@ -26,6 +26,7 @@ export default function ProductoDetalle({ producto }: { producto: Producto }) {
         imagenes={imagenes}
         nombre={producto.nombre}
         principal={imagenColor ?? null}
+        tint={tintColor ?? null}
       />
 
       <div className="flex flex-col gap-5">

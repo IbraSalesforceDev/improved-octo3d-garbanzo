@@ -30,6 +30,7 @@ export async function saveProducto(input: ProductoInput) {
     imagen_url: input.imagenes[0] ?? null,
     imagenes: input.imagenes,
     imagenes_color: input.imagenes_color,
+    colores_hex: input.colores_hex,
     opciones: input.opciones,
     categoria: input.categoria,
     destacado: input.destacado,

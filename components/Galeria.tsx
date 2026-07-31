@@ -7,10 +7,12 @@ export default function Galeria({
   imagenes,
   nombre,
   principal,
+  tint,
 }: {
   imagenes: string[];
   nombre: string;
   principal?: string | null;
+  tint?: string | null;
 }) {
   const [activa, setActiva] = useState(0);
 
@@ -49,7 +51,7 @@ export default function Galeria({
   return (
     <div className="flex flex-col gap-3">
       <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-100">
-        <div className="relative aspect-square w-full">
+        <div className="relative aspect-square w-full [isolation:isolate]">
           <Image
             src={imagenActiva}
             alt={nombre}
@@ -58,6 +60,13 @@ export default function Galeria({
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
           />
+          {tint && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{ backgroundColor: tint, mixBlendMode: "color" }}
+            />
+          )}
         </div>
       </div>
 

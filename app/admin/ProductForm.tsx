@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { comprimirImagen } from "@/lib/comprimirImagen";
+import { guessHex } from "@/lib/colores";
 import { saveProducto, deleteProducto } from "./actions";
 import type { Opciones, Producto } from "@/lib/types";
 
@@ -68,6 +69,9 @@ export default function ProductForm({
   const [subiendo, setSubiendo] = useState(false);
   const [imagenesColor, setImagenesColor] = useState<Record<string, string>>(
     producto?.imagenes_color ?? {}
+  );
+  const [coloresHex, setColoresHex] = useState<Record<string, string>>(
+    producto?.colores_hex ?? {}
   );
   const [grupos, setGrupos] = useState<Grupo[]>(
     producto ? opcionesToGrupos(producto.opciones) : []
@@ -213,6 +217,11 @@ export default function ProductForm({
       const imagenesColorLimpio = Object.fromEntries(
         Object.entries(imagenesColor).filter(([k]) => coloresSet.has(k))
       );
+      const coloresHexLimpio: Record<string, string> = {};
+      for (const c of coloresChoices) {
+        const hex = coloresHex[c] ?? guessHex(c);
+        if (hex) coloresHexLimpio[c] = hex;
+      }
 
       await saveProducto({
         id: producto?.id,
@@ -221,6 +230,7 @@ export default function ProductForm({
         precio_base: precio,
         imagenes,
         imagenes_color: imagenesColorLimpio,
+        colores_hex: coloresHexLimpio,
         opciones: gruposToOpciones(grupos),
         categoria: categoria.trim() || null,
         destacado,
@@ -473,17 +483,29 @@ export default function ProductForm({
       {coloresChoices.length > 0 && (
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Foto por color{" "}
+            Color: tono y foto{" "}
             <span className="font-normal text-neutral-400">(opcional)</span>
           </label>
           <p className="mb-2 text-xs text-neutral-400">
-            Asigna una foto a cada color; al elegirlo en la tienda, la imagen
-            cambiará.
+            Al elegir un color en la tienda: si subes una <b>foto</b>, se muestra
+            esa foto; si no, se recolorea la foto base con el <b>tono</b> elegido.
           </p>
           <div className="flex flex-col gap-2">
             {coloresChoices.map((color) => (
               <div key={color} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 text-sm capitalize">{color}</span>
+                <span className="w-20 shrink-0 text-sm capitalize">{color}</span>
+                <input
+                  type="color"
+                  value={coloresHex[color] ?? guessHex(color) ?? "#cccccc"}
+                  onChange={(e) =>
+                    setColoresHex((prev) => ({
+                      ...prev,
+                      [color]: e.target.value,
+                    }))
+                  }
+                  title="Tono (se usa si no subes foto)"
+                  className="h-8 w-9 shrink-0 cursor-pointer rounded border border-neutral-300 bg-white p-0.5"
+                />
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-neutral-100">
                   {imagenesColor[color] && (
                     // eslint-disable-next-line @next/next/no-img-element

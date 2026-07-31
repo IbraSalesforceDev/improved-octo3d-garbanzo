@@ -34,5 +34,11 @@ export function usePedido(producto: Producto) {
     ? producto.imagenes_color?.[colorElegido]
     : undefined;
 
-  return { grupos, seleccion, elegir, precioFinal, imagenColor };
+  // Si el color no tiene foto propia pero sí un tono, recoloreamos la foto base.
+  const tintColor =
+    !imagenColor && colorElegido
+      ? producto.colores_hex?.[colorElegido]
+      : undefined;
+
+  return { grupos, seleccion, elegir, precioFinal, imagenColor, tintColor };
 }

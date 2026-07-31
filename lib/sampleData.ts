@@ -13,6 +13,7 @@ export const sampleProductos: Producto[] = [
     imagen_url: null,
     imagenes: [],
     imagenes_color: {},
+    colores_hex: {},
     opciones: {
       color: { blanco: 0, negro: 3, dorado: 5 },
       tamano: { S: 0, M: 5, L: 10 },
@@ -32,6 +33,7 @@ export const sampleProductos: Producto[] = [
     imagen_url: null,
     imagenes: [],
     imagenes_color: {},
+    colores_hex: {},
     opciones: {
       color: { blanco: 0, terracota: 2, verde: 2 },
     },
@@ -50,6 +52,7 @@ export const sampleProductos: Producto[] = [
     imagen_url: null,
     imagenes: [],
     imagenes_color: {},
+    colores_hex: {},
     opciones: {
       color: { negro: 0, azul: 1, rojo: 1 },
       acabado: { mate: 0, brillo: 2 },

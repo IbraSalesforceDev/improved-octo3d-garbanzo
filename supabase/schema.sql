@@ -10,6 +10,7 @@ create table if not exists productos (
   imagen_url text,
   imagenes text[] not null default '{}',
   imagenes_color jsonb not null default '{}'::jsonb,
+  colores_hex jsonb not null default '{}'::jsonb,
   opciones jsonb not null default '{}'::jsonb,
   categoria text,
   orden integer not null default 0,

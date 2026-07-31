@@ -7,7 +7,7 @@ import PedidoControls from "./PedidoControls";
 import { usePedido } from "@/hooks/usePedido";
 
 export default function ProductCard({ producto }: { producto: Producto }) {
-  const { grupos, seleccion, elegir, precioFinal, imagenColor } =
+  const { grupos, seleccion, elegir, precioFinal, imagenColor, tintColor } =
     usePedido(producto);
 
   const href = `/producto/${producto.id}`;
@@ -18,7 +18,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-neutral-200">
       <Link
         href={href}
-        className="relative block aspect-square w-full overflow-hidden bg-gradient-to-br from-neutral-100 to-neutral-200"
+        className="relative block aspect-square w-full overflow-hidden bg-gradient-to-br from-neutral-100 to-neutral-200 [isolation:isolate]"
       >
         {imagen ? (
           <Image
@@ -45,8 +45,15 @@ export default function ProductCard({ producto }: { producto: Producto }) {
             </svg>
           </div>
         )}
+        {tintColor && imagen && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ backgroundColor: tintColor, mixBlendMode: "color" }}
+          />
+        )}
         {producto.categoria && (
-          <span className="absolute left-3 top-3 rounded-full bg-[var(--lima)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--tinta)]">
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--lima)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--tinta)]">
             {producto.categoria}
           </span>
         )}

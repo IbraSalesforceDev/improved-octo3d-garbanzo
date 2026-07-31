@@ -14,6 +14,9 @@ export interface Producto {
   imagenes: string[];
   // Imagen por color: { "negro": url, ... }. Al elegir ese color, cambia la foto.
   imagenes_color: Record<string, string>;
+  // Tono real por color: { "negro": "#111111", ... }. Para recolorear la foto
+  // cuando ese color no tiene foto propia.
+  colores_hex: Record<string, string>;
   opciones: Opciones;
   categoria: string | null;
   orden: number;
@@ -41,6 +44,7 @@ export interface ProductoInput {
   precio_base: number;
   imagenes: string[];
   imagenes_color: Record<string, string>;
+  colores_hex: Record<string, string>;
   opciones: Opciones;
   categoria: string | null;
   destacado: boolean;
